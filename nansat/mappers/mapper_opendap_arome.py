@@ -39,6 +39,9 @@ class Mapper(MapperNCCF, Opendap):
         
         self.input_filename = filename
 
+        if "thredds.met.no" not in filename:
+            raise WrongMapperError
+
         if gdal_dataset is None:
             gdal_dataset = gdal.Open(filename)
 

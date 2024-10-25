@@ -31,6 +31,9 @@ class Mapper(MapperNCCF, Opendap):
         if netcdf_dim is None:
             netcdf_dim = {}
         
+        if "thredds.met.no" not in filename:
+            raise WrongMapperError
+
         self.input_filename = filename
 
         if gdal_dataset is None:
