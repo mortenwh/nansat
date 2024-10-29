@@ -1416,7 +1416,7 @@ class Nansat(Domain, Exporter):
 
         Examples
         --------
-            >>> extent = n.crop(lonlim=[-10,10], latlim=[-20,20]) # crop for given lon/lat limits
+            >>> extent = n.crop([-10,10], [-20,20]) # crop for given lon/lat limits
 
         """
         # lon/lat lists for four corners
