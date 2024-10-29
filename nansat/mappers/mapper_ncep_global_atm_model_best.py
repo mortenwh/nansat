@@ -18,8 +18,7 @@ class Mapper(VRT):
         and get Nansat object with arrays as close as possible to the
         given time.
 
-        Time must be type datetime with timezone, e.g.,
-        datetime.datetime(2024, 9, 10, 15, 0, 0, tzinfo=pytz.utc).
+        Time must be type datetime64. Timezone is assumed to be UTC.
         """
 
         fn = ("https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/"
