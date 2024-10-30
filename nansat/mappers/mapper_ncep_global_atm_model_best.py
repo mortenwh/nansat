@@ -34,13 +34,20 @@ class Mapper(VRT):
         for key in ds.ncattrs():
             metadata[key] = str(ds.getncattr(key))
 
-        lon = ds["longitude"][:]
+        lon = (ds["longitude"][:] + 180.) % 360 - 180.
+        #lon = ds["longitude"][:]
         lat = ds["latitude"][:]
         times = ds["time"][:]
 
         longitude, latitude = np.meshgrid(lon, lat)
+        # Shift array to yield -180 to 180 deg longitude
+        ind = np.where(lon<0)[0]
+        xx = np.empty(longitude.shape)
+        xx[:, 0:ind.shape[0]] = longitude[:, ind.min():]
+        xx[:, ind.shape[0]:] = longitude[:, 0:ind.min()]
+        longitude = xx
 
-        super(Mapper, self)._init_from_lonlat(longitude, latitude)
+        super(Mapper, self)._init_from_lonlat(longitude, latitude, add_gcps=True)
         self.dataset.SetMetadata(metadata)
 
         t0 = parse(ds["time"].units.strip("hours since "))
@@ -51,13 +58,6 @@ class Mapper(VRT):
                netcdf_dim["time"].astype(datetime.datetime).replace(tzinfo=pytz.utc)
         time_index = np.abs(diff).argmin()
 
-        for var, val in ds.variables.items():
-            if "standard_name" in ds[var].ncattrs():
-                if val.standard_name == "longitude":
-                    lon = var
-                if val.standard_name == "latitude":
-                    lat = var
-
         for attr in ds.ncattrs():
             content = ds.getncattr(attr)
             if type(content) is str:
@@ -67,11 +67,13 @@ class Mapper(VRT):
         metaDict = []
 
         for key, val in ds.variables.items():
-            data = ds[key]
-            if data.shape != (t1.shape[0], longitude.shape[0], longitude.shape[1]):
+            if ds[key].shape != (t1.shape[0], longitude.shape[0], longitude.shape[1]):
                 continue
-            self.band_vrts[key] = VRT.from_array(
-                data[time_index, :, :].filled(fill_value=np.nan))
+            data = ds[key][time_index, :, :].filled(fill_value=np.nan)
+            xx = np.empty(longitude.shape)
+            xx[:, 0:ind.shape[0]] = data[:, ind.min():]
+            xx[:, ind.shape[0]:] = data[:, 0:ind.min()]
+            self.band_vrts[key] = VRT.from_array(xx)
             key_metadict = {}
             for attr in ds[key].ncattrs():
                 key_metadict[attr] = ds[key].getncattr(attr)
