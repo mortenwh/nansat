@@ -18,6 +18,7 @@ else:
 
 import pythesint as pti
 
+from nansat.nsr import NSR
 from nansat.vrt import VRT
 from nansat.mappers.envisat import Envisat
 from nansat.domain import Domain
@@ -291,3 +292,7 @@ class Mapper(VRT, Envisat):
 
         self.dataset.SetMetadataItem('instrument', json.dumps(mm))
         self.dataset.SetMetadataItem('platform', json.dumps(ee))
+
+        # Set projection
+        if self.dataset.GetProjection() == "":
+            self.dataset.SetProjection(NSR().wkt)
