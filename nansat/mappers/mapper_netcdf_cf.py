@@ -450,9 +450,6 @@ class Mapper(VRT):
             try:
                 self._create_empty_from_subdatasets(gdal_dataset, gdal_metadata)
             except NansatMissingProjectionError:
-                # this happens rarely - a special workaround is done in mapper_quikscat
-                warnings.warn('GDAL cannot determine the dataset projection - using Nansat ' \
-                        'spatial reference WKT, assuming a regular longitude/latitude grid')
                 self._create_empty_with_nansat_spatial_reference_WKT(gdal_dataset, gdal_metadata)
 
     def _create_empty_from_projection_variable(self, gdal_dataset, gdal_metadata):
