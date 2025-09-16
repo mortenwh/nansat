@@ -256,9 +256,14 @@ class Mapper(VRT):
         ds = Dataset(self.input_filename)
         index4key = collections.OrderedDict()
         for key in dimension_names:
-            if key in netcdf_dim.keys():
-                val = netcdf_dim[key]
-                if key == 'time':
+            var = ds[key]
+            if "standard_name" in var.ncattrs():
+                check_attr = var.standard_name
+            else:
+                check_attr = key
+            if check_attr in netcdf_dim.keys():
+                val = netcdf_dim[check_attr]
+                if "time" == check_attr:
                     if type(val) != datetime.datetime and type(val) != np.datetime64:
                         raise ValueError
                     if type(val) == datetime.datetime:
@@ -266,13 +271,13 @@ class Mapper(VRT):
                     # Get band number from given timestamp
                     index = int(np.argmin(np.abs(self.times() - val)))
                 else:
-                    index = int(np.argmin(np.abs(ds.variables[key][:] - val)))
+                    index = int(np.argmin(np.abs(ds.variables[check_attr][:] - val)))
                 index4key[key] = {
                         'index': index,
                         'size': dim_sizes[key],
                     }
             else:
-                index4key[key] = {
+                index4key[check_attr] = {
                         'index': 0,
                         'size': dim_sizes[key],
                     }
